@@ -1,6 +1,9 @@
-Flask==3.0.0
-Werkzeug==3.0.1
+Flask==3.0.3
+Werkzeug==3.0.6
 pytest==7.4.3
 pytest-cov==4.1.0
-bandit==1.7.5
-safety==2.3.5
+bandit==1.7.10
+safety==3.2.0
+pbr>=5.11.0
+stevedore>=5.0.0
+PyYAML>=6.0

@@ -1,0 +1,18 @@
+# Fichiers à ignorer pour Semgrep
+
+# Version intentionnellement vulnérable (pour démonstration)
+app_vulnerable.py
+
+# Tests
+tests/
+
+# Environnement virtuel
+venv/
+.venv/
+
+# Cache
+__pycache__/
+*.pyc
+
+# Reports
+reports/
