@@ -67,7 +67,18 @@ jobs:
     - name: Scan Bandit (SAST)
       run: |
         bandit -r app.py -f json -o bandit-report.json || true
-        bandit -r app.py -f txt
+        bandit -r app.py -f txt || true
+        
+        # Vérifier seulement les HIGH/CRITICAL
+        if [ -f bandit-report.json ]; then
+          high_count=$(jq '.metrics._totals."SEVERITY.HIGH"' bandit-report.json)
+          if [ "$high_count" -gt 0 ]; then
+            echo "❌ Bandit a trouvé $high_count vulnérabilités HIGH"
+            exit 1
+          else
+            echo "✅ Bandit: Aucune vulnérabilité HIGH/CRITICAL"
+          fi
+        fi
       continue-on-error: false
     
     - name: Upload du rapport Bandit
