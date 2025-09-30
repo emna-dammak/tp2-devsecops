@@ -1,3 +1,7 @@
+"""
+Cette version contient des vulnérabilités intentionnelles pour la démonstration.
+NE PAS UTILISER EN PRODUCTION!
+"""
 from flask import Flask, request, render_template_string
 import sqlite3
 import os
@@ -28,11 +32,12 @@ def home():
         <h1>Bienvenue sur l'application de démonstration</h1>
         <p><a href="/users">Voir les utilisateurs</a></p>
         <p><a href="/search">Rechercher un utilisateur</a></p>
+        <p><a href="/admin">Panel Admin</a></p>
     ''')
 
 @app.route('/users')
 def list_users():
-    """Liste tous les utilisateurs - VERSION SÉCURISÉE"""
+    """Liste tous les utilisateurs"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('SELECT id, username, email FROM users')
@@ -56,15 +61,17 @@ def search():
         </form>
     ''')
 
+# VULNÉRABILITÉ 1: Injection SQL
 @app.route('/search_result')
 def search_result():
-    """Résultat de recherche - VERSION SÉCURISÉE avec paramètres liés"""
+    """Résultat de recherche - VULNÉRABLE À L'INJECTION SQL"""
     username = request.args.get('username', '')
     
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    # Utilisation de paramètres liés pour éviter l'injection SQL
-    cursor.execute('SELECT id, username, email FROM users WHERE username LIKE ?', (f'%{username}%',))
+    # DANGER: Concaténation directe sans paramètres liés
+    query = f"SELECT id, username, email FROM users WHERE username LIKE '%{username}%'"
+    cursor.execute(query)
     users = cursor.fetchall()
     conn.close()
     
@@ -75,6 +82,44 @@ def search_result():
     html += '<p><a href="/search">Nouvelle recherche</a></p>'
     
     return render_template_string(html)
+
+# VULNÉRABILITÉ 2: Route admin non protégée
+@app.route('/admin')
+def admin_panel():
+    """Panel d'administration - NON PROTÉGÉ"""
+    # DANGER: Pas d'authentification requise
+    return render_template_string('''
+        <h1>Panel Administrateur</h1>
+        <p>Bienvenue dans le panel d'administration!</p>
+        <ul>
+            <li><a href="/admin/delete_all">Supprimer tous les utilisateurs</a></li>
+            <li><a href="/admin/config">Configuration système</a></li>
+        </ul>
+    ''')
+
+# VULNÉRABILITÉ 3: Endpoint dangereux non protégé
+@app.route('/admin/delete_all')
+def delete_all_users():
+    """Supprime tous les utilisateurs - NON PROTÉGÉ"""
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM users')
+    conn.commit()
+    conn.close()
+    return 'Tous les utilisateurs ont été supprimés!'
+
+# VULNÉRABILITÉ 4: Exposition d'informations sensibles
+@app.route('/admin/config')
+def show_config():
+    """Affiche la configuration - EXPOSE DES SECRETS"""
+    # DANGER: Exposition de variables d'environnement
+    config = {
+        'database': DATABASE,
+        'secret_key': 'super_secret_key_123',  # Secret hardcodé
+        'api_key': os.environ.get('API_KEY', 'default_api_key'),
+        'debug': True
+    }
+    return config
 
 @app.route('/api/user/<int:user_id>')
 def get_user(user_id):
@@ -95,5 +140,5 @@ def get_user(user_id):
 
 if __name__ == '__main__':
     init_db()
-    # En production, ne jamais utiliser debug=True
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # VULNÉRABILITÉ 5: Debug mode activé en production
+    app.run(host='0.0.0.0', port=5000, debug=True)
