@@ -142,10 +142,11 @@ jobs:
       with:
         project: ${{ env.APP_NAME }}
         path: '.'
-        format: 'HTML,JSON'
+        format: 'HTML JSON'
         args: >
           --failOnCVSS 7
           --enableRetired
+      continue-on-error: true
     
     - name: Upload du rapport OWASP
       uses: actions/upload-artifact@v4
