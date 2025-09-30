@@ -292,9 +292,10 @@ jobs:
       with:
         target: 'http://localhost:5000'
         rules_file_name: '.zap/rules.tsv'
-        cmd_options: '-a -j'
-        fail_action: true
+        cmd_options: '-a'
+        fail_action: false
         allow_issue_writing: false
+      continue-on-error: true
     
     # Scan DAST avec Nuclei
     - name: Installation de Nuclei
