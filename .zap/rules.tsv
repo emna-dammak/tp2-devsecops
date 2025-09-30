@@ -1,0 +1,18 @@
+# ZAP Scanning Rules Configuration
+# Format: ID	THRESHOLD	[INSTANCE_IDS]
+# THRESHOLD: OFF, DEFAULT, LOW, MEDIUM, HIGH
+# Ignorer certaines règles non critiques pour l'environnement de test
+
+10202	IGNORE	# Absence of Anti-CSRF Tokens (ignoré en dev)
+10015	IGNORE	# Re-examine Cache-control Directives
+10017	IGNORE	# Cross-Domain JavaScript Source File Inclusion
+10054	IGNORE	# Cookie Without SameSite Attribute
+10096	IGNORE	# Timestamp Disclosure
+10055	IGNORE	# CSP Header Not Set (à configurer en prod)
+
+# Règles critiques à ne jamais ignorer
+40012	FAIL	# Cross Site Scripting (Reflected)
+40014	FAIL	# Cross Site Scripting (Persistent)
+40018	FAIL	# SQL Injection
+90019	FAIL	# Server Side Code Injection
+90020	FAIL	# Remote OS Command Injection

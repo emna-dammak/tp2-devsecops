@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Application Flask
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+    volumes:
+      - ./:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # OWASP ZAP pour tests locaux
+  zap:
+    image: owasp/zap2docker-stable:latest
+    command: zap-baseline.py -t http://app:5000 -r zap-report.html
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./zap-reports:/zap/wrk
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
